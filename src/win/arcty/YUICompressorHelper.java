@@ -3,6 +3,7 @@ package win.arcty;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
@@ -19,10 +20,7 @@ import org.mozilla.javascript.EvaluatorException;
 import javax.swing.JTextPane;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 
 public class YUICompressorHelper extends AnAction {
 
@@ -46,14 +44,25 @@ public class YUICompressorHelper extends AnAction {
 		if (this.project == null) {
 			this.project = e.getProject();
 		}
-		final VirtualFile vFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
-		final VirtualFile vPath = e.getData(PlatformDataKeys.PROJECT_FILE_DIRECTORY);
+		VirtualFile vFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
+		VirtualFile vPath = e.getData(PlatformDataKeys.PROJECT_FILE_DIRECTORY);
 		if (vFile == null || vPath == null) {
 			return;
 		}
-		final String file = vFile.getPath();
-		final String outPath = file.substring(0, file.lastIndexOf(vFile.getName()));
-		final String outFile = vFile.getNameWithoutExtension() + ".min." + vFile.getExtension();
+		String ext = vFile.getExtension();
+		if (ext == null || (!ext.equalsIgnoreCase("js") && !ext.equalsIgnoreCase("css"))) {
+			return;
+		}
+
+		YUICompress doCompress = new YUICompress();
+		doCompress.vPath = vPath;
+		doCompress.ext = ext;
+
+		String file = vFile.getPath();
+		String path = file.substring(0, file.lastIndexOf(vFile.getName()));
+		String outFile = path + vFile.getNameWithoutExtension() + ".min." + vFile.getExtension();
+		doCompress.inputFile = file;
+		doCompress.outputFile = outFile;
 
 		if (this.toolWindow == null) {
 			this.log = new JTextPane();
@@ -62,74 +71,9 @@ public class YUICompressorHelper extends AnAction {
 			this.toolWindow = ToolWindowManager.getInstance(this.project).registerToolWindow("Assets", true, ToolWindowAnchor.BOTTOM);
 			this.toolWindow.getContentManager().addContent(content);
 		}
+		doCompress.log = this.log;
 
-		this.toolWindow.activate(new Runnable() {
-			public void run() {
-				YUICompressorHelper.this.appendLog("Compressing " + file + "\nPlease wait ...");
-				String ext = vFile.getExtension();
-				if (ext == null) {
-					return;
-				} else if (ext.equalsIgnoreCase("js")) {
-					YUICompressorHelper.this.CompressJS(file, outPath + outFile);
-				} else if (ext.equalsIgnoreCase("css")) {
-					YUICompressorHelper.this.CompressCSS(file, outPath + outFile);
-				}
-				YUICompressorHelper.this.appendLog("Save to " + outPath + outFile + "\nDone");
-				vPath.refresh(false, true);
-			}
-		});
-	}
-
-	private void CompressCSS(String inputFile, String outputFile) {
-		try {
-			InputStreamReader in = new InputStreamReader(new FileInputStream(inputFile), "UTF-8");
-			CssCompressor compressor = new CssCompressor(in);
-			in.close();
-			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8");
-			compressor.compress(out, -1);
-		} catch (Exception e) {
-			YUICompressorHelper.this.appendLog("Compress failed");
-		}
-	}
-
-	private void CompressJS(String inputFile, String outputFile) {
-		try {
-			InputStreamReader in = new InputStreamReader(new FileInputStream(inputFile), "UTF-8");
-			JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
-				public void warning(String message, String sourceName, int line, String lineSource, int lineOffset) {
-					if (line < 0) {
-						YUICompressorHelper.this.appendLog("[WARNING] " + message);
-					} else {
-						YUICompressorHelper.this.appendLog("[WARNING] " + line + ':' + lineOffset + ':' + message);
-					}
-				}
-				public void error(String message, String sourceName, int line, String lineSource, int lineOffset) {
-					if (line < 0) {
-						YUICompressorHelper.this.appendLog("[ERROR] " + message);
-					} else {
-						YUICompressorHelper.this.appendLog("[ERROR] " + line + ':' + lineOffset + ':' + message);
-					}
-				}
-				public EvaluatorException runtimeError(String message, String sourceName, int line, String lineSource, int lineOffset) {
-					this.error(message, sourceName, line, lineSource, lineOffset);
-					return new EvaluatorException(message);
-				}
-			});
-			in.close();
-			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8");
-			compressor.compress(out, -1, false, true, true, false);
-		} catch (Exception e) {
-			YUICompressorHelper.this.appendLog("Compress failed");
-		}
-	}
-
-	private void appendLog(String text) {
-		Document doc = this.log.getDocument();
-		SimpleAttributeSet attributes = new SimpleAttributeSet();
-		try {
-			doc.insertString(doc.getLength(), text + "\n", attributes);
-		} catch (Exception e) {
-		}
+		this.toolWindow.activate(doCompress);
 	}
 
 }

@@ -4,8 +4,6 @@
   <version>1.0</version>
   <vendor email="mryork@sohu.com" url="http://arcty.win">Mryork</vendor>
   <description><![CDATA[]]></description>
-  <extensions defaultExtensionNs="com.intellij">
-  </extensions>
   <actions>
     <action id="YUICompressorHelper" class="win.arcty.YUICompressorHelper" text="YUICompress">
       <add-to-group group-id="RefactoringMenu" anchor="first"/>
