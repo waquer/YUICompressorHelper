@@ -1,12 +1,12 @@
-<idea-plugin version="2">
-  <id>YUICompressorHelper</id>
-  <name>YUICompressorHelper</name>
-  <version>1.0</version>
-  <vendor email="mryork@sohu.com" url="http://arcty.win">Mryork</vendor>
-  <description><![CDATA[]]></description>
-  <actions>
-    <action id="YUICompressorHelper" class="win.arcty.YUICompressorHelper" text="YUICompress">
-      <add-to-group group-id="RefactoringMenu" anchor="first"/>
-    </action>
-  </actions>
+<idea-plugin>
+	<id>YUICompressorHelper</id>
+	<name>YUICompressorHelper</name>
+	<version>1.0</version>
+	<vendor email="mryork@sohu.com" url="http://arcty.win">Mryork</vendor>
+	<description><![CDATA[]]></description>
+	<actions>
+		<action id="YUICompressorHelper" class="win.arcty.YUICompressorHelper" text="YUICompress">
+			<add-to-group group-id="RefactoringMenu" anchor="first"/>
+		</action>
+	</actions>
 </idea-plugin>

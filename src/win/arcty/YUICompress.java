@@ -13,11 +13,11 @@ import java.io.*;
 
 public class YUICompress implements Runnable {
 
-	JTextPane log;
+	VirtualFile vPath;
 	String outputFile;
 	String inputFile;
 	String ext;
-	VirtualFile vPath;
+	JTextPane log;
 
 	public void run() {
 		this.appendLog("Compressing " + inputFile + "\nPlease wait ...");
@@ -34,7 +34,7 @@ public class YUICompress implements Runnable {
 			return;
 		}
 		this.appendLog("Save to " + outputFile + "\nDone");
-		vPath.refresh(false, true);
+		//vPath.refresh(false, true);
 	}
 
 	private void CompressCSS(Reader in, Writer out) throws IOException {
@@ -69,7 +69,6 @@ public class YUICompress implements Runnable {
 		compressor.compress(out, -1, false, true, true, false);
 		in.close();
 	}
-
 
 	private void appendLog(String text) {
 		Document doc = this.log.getDocument();

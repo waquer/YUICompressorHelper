@@ -33,9 +33,7 @@ public class YUICompressorHelper extends AnAction {
 	}
 
 	public void actionPerformed(AnActionEvent e) {
-		if (this.project == null) {
-			this.project = e.getProject();
-		}
+
 		VirtualFile vFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
 		VirtualFile vPath = e.getData(PlatformDataKeys.PROJECT_FILE_DIRECTORY);
 		if (vFile == null || vPath == null) {
@@ -46,23 +44,28 @@ public class YUICompressorHelper extends AnAction {
 			return;
 		}
 
-		YUICompress doCompress = new YUICompress();
-		doCompress.vPath = vPath;
-		doCompress.ext = ext;
-
 		String file = vFile.getPath();
 		String path = file.substring(0, file.lastIndexOf(vFile.getName()));
 		String outFile = path + vFile.getNameWithoutExtension() + ".min." + vFile.getExtension();
-		doCompress.inputFile = file;
-		doCompress.outputFile = outFile;
 
-		if (this.toolWindow == null) {
+		if (this.project == null) {
+			this.project = e.getProject();
+		}
+		if (this.log == null) {
 			this.log = new JTextPane();
+		}
+		if (this.toolWindow == null) {
 			JBScrollPane scrollPane = new JBScrollPane(this.log);
 			Content content = ContentFactory.SERVICE.getInstance().createContent(scrollPane, "Output", false);
 			this.toolWindow = ToolWindowManager.getInstance(this.project).registerToolWindow("Assets", true, ToolWindowAnchor.BOTTOM);
 			this.toolWindow.getContentManager().addContent(content);
 		}
+
+		YUICompress doCompress = new YUICompress();
+		doCompress.vPath = vPath;
+		doCompress.inputFile = file;
+		doCompress.outputFile = outFile;
+		doCompress.ext = ext;
 		doCompress.log = this.log;
 
 		this.toolWindow.activate(doCompress);
