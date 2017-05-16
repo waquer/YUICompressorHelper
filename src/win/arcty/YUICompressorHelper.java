@@ -61,7 +61,7 @@ public class YUICompressorHelper extends AnAction {
 			this.toolWindow.getContentManager().addContent(content);
 		}
 
-		YUICompress doCompress = new YUICompress();
+		YUICompressRunnable doCompress = new YUICompressRunnable();
 		doCompress.vPath = vPath;
 		doCompress.inputFile = file;
 		doCompress.outputFile = outFile;

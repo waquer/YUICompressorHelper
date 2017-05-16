@@ -11,7 +11,7 @@ import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import java.io.*;
 
-public class YUICompress implements Runnable {
+public class YUICompressRunnable implements Runnable {
 
 	VirtualFile vPath;
 	String outputFile;
@@ -47,17 +47,17 @@ public class YUICompress implements Runnable {
 		JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
 			public void warning(String message, String sourceName, int line, String lineSource, int lineOffset) {
 				if (line < 0) {
-					YUICompress.this.appendLog("[WARNING] " + message);
+					YUICompressRunnable.this.appendLog("[WARNING] " + message);
 				} else {
-					YUICompress.this.appendLog("[WARNING] " + line + ':' + lineOffset + ':' + message);
+					YUICompressRunnable.this.appendLog("[WARNING] " + line + ':' + lineOffset + ':' + message);
 				}
 			}
 
 			public void error(String message, String sourceName, int line, String lineSource, int lineOffset) {
 				if (line < 0) {
-					YUICompress.this.appendLog("[ERROR] " + message);
+					YUICompressRunnable.this.appendLog("[ERROR] " + message);
 				} else {
-					YUICompress.this.appendLog("[ERROR] " + line + ':' + lineOffset + ':' + message);
+					YUICompressRunnable.this.appendLog("[ERROR] " + line + ':' + lineOffset + ':' + message);
 				}
 			}
 
